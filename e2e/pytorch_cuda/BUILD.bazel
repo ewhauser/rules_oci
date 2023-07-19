@@ -1,0 +1,22 @@
+load("@rules_oci//oci:defs.bzl", "oci_image", "oci_tarball")
+load("@bazel_skylib//rules:build_test.bzl", "build_test")
+load("@rules_pkg//:pkg.bzl", "pkg_tar")
+
+package(default_visibility = ["//visibility:public"])
+
+oci_image(
+    name = "image",
+    base = "@pytorch_cuda_11_7",
+    tars = [
+        # ":test.tar", WORKS
+        # ":test.tar.gz", WORKS
+        # ":test.tar.xz", # failed to unpack loaded image: failed to extract layer sha256:9a7b289cbf9aacdd4dfaf6dc8a1a3b209f1f2c81e5b9c636955e62de81760019: unexpected EOF: unknown
+        "@bash_amd64//:layer", # failed to unpack loaded image: failed to extract layer sha256:f497872f8621fdbe746a9f2a50d3703cd8b6d5ed4319fc3d3d7175f7118ffe7a: archive/tar: invalid tar header: unknown
+    ],
+)
+
+oci_tarball(
+    name = "tarball",
+    image = ":image",
+    repo_tags = ["cuda_test:latest"],
+)
